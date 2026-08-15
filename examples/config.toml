@@ -1,0 +1,19 @@
+# termrec configuration file
+#
+# Lives at ~/.config/termrec/config.toml on Linux/macOS
+# ($XDG_CONFIG_HOME/termrec/config.toml if XDG_CONFIG_HOME is set).
+#
+# Every setting is optional. Values are resolved as:
+#   command-line flag > config file > built-in default
+
+# Prompt printed before each command in a rendered transcript.
+# Default: "$ "
+prompt = "❯ "
+
+# Terminal width (columns) used when replaying a recording.
+# Default: 80
+cmd_width = 120
+
+# Terminal height (rows) used when replaying a recording.
+# Default: 1000
+cmd_height = 40

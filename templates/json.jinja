@@ -1,0 +1,13 @@
+{
+  "name": {{ recording.name | tojson }},
+  "started_ts": {{ recording.started_ts | tojson }},
+  "sections": [
+{%- for section in recording.sections %}
+    {
+      "command": {{ section.command | tojson }},
+      "output": {{ section.output | tojson }}
+    }{{ "," if not loop.last }}
+{%- endfor %}
+  ],
+  "_generated_by": "termrec"
+}

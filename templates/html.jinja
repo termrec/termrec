@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ recording.name }} · termrec transcript</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface-2: #1c2330;
+      --border: #2a3242;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #3fb950;
+      --accent-dim: #2ea043;
+      --radius: 10px;
+      --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    html[data-theme="light"] {
+      --bg: #f6f8fa;
+      --surface: #ffffff;
+      --surface-2: #f0f3f6;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --muted: #57606a;
+      --accent: #1a7f37;
+      --accent-dim: #2da44e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.5;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      font-family: var(--mono);
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+    }
+    .logo .dot { color: var(--muted); }
+    .title {
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .spacer { flex: 1; }
+    button {
+      font: inherit;
+      font-size: 13px;
+      color: var(--text);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: border-color 0.15s ease, color 0.15s ease;
+    }
+    button:hover { border-color: var(--accent); color: var(--accent); }
+    button:active { transform: translateY(1px); }
+
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 32px 20px 8px;
+    }
+
+    .hero { text-align: center; margin-bottom: 28px; }
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(22px, 4vw, 30px);
+      font-family: var(--mono);
+    }
+    .hero .meta { color: var(--muted); margin: 8px 0 0; font-size: 14px; }
+    .hero .meta b { color: var(--accent); font-weight: 600; }
+
+    .command {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .command-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+    }
+    .num {
+      flex-shrink: 0;
+      min-width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .command-text {
+      flex: 1;
+      margin: 0;
+      font-family: var(--mono);
+      font-size: 13px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: var(--text);
+    }
+    .output {
+      margin: 0;
+      padding: 14px 16px 16px;
+      font-family: var(--mono);
+      font-size: 13px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--text);
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 16px 24px 32px;
+    }
+    @media (max-width: 600px) {
+      .title { display: none; }
+      main { padding-top: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="logo">termrec<span class="dot">.</span></span>
+    <span class="title">{{ recording.name }}</span>
+    <div class="spacer"></div>
+    <button id="copy-all" type="button">Copy all</button>
+    <button id="theme-toggle" type="button">Light</button>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>{{ recording.name }}</h1>
+      <p class="meta">
+        <b>{{ recording.sections | length }}</b>
+        {%- if recording.sections | length == 1 %} command{% else %} commands{% endif %}
+        · recorded {{ recording.started_ts | date_format('%B %d, %Y at %H:%M %Z') }}
+      </p>
+    </section>
+
+    {% for section in recording.sections %}
+    <section class="command">
+      <div class="command-header">
+        <span class="num">{{ loop.index }}</span>
+        <pre class="command-text">{{ prompt | escape }}{{ section.command | escape }}</pre>
+        <button class="copy" type="button" data-target="out-{{ loop.index }}">Copy</button>
+      </div>
+      {% if section.output %}
+      <pre class="output" id="out-{{ loop.index }}">{{ section.output | escape }}</pre>
+      {% endif %}
+    </section>
+    {% endfor %}
+  </main>
+
+  <footer>Generated by termrec.</footer>
+
+  <script>
+    (function () {
+      "use strict";
+      var root = document.documentElement;
+
+      function setTheme(theme) {
+        root.dataset.theme = theme;
+        try { localStorage.setItem("termrec-theme", theme); } catch (e) {}
+        document.getElementById("theme-toggle").textContent = theme === "dark" ? "Light" : "Dark";
+      }
+
+      var saved = null;
+      try { saved = localStorage.getItem("termrec-theme"); } catch (e) {}
+      var prefers = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      setTheme(saved || prefers);
+
+      document.getElementById("theme-toggle").addEventListener("click", function () {
+        setTheme(root.dataset.theme === "dark" ? "light" : "dark");
+      });
+
+      function legacyCopy(text) {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+
+      function copyText(text, button) {
+        function done() {
+          var old = button.textContent;
+          button.textContent = "Copied!";
+          setTimeout(function () { button.textContent = old; }, 1200);
+        }
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(text).then(done, function () { legacyCopy(text); done(); });
+        } else {
+          legacyCopy(text);
+          done();
+        }
+      }
+
+      document.querySelectorAll(".copy").forEach(function (button) {
+        button.addEventListener("click", function () {
+          var el = document.getElementById(button.dataset.target);
+          if (el) copyText(el.textContent + "\n", button);
+        });
+      });
+
+      document.getElementById("copy-all").addEventListener("click", function () {
+        var parts = [];
+        document.querySelectorAll(".command").forEach(function (card) {
+          var cmd = card.querySelector(".command-text");
+          var out = card.querySelector(".output");
+          parts.push(cmd.textContent + (out ? "\n" + out.textContent : ""));
+        });
+        copyText(parts.join("\n\n") + "\n", this);
+      });
+    })();
+  </script>
+</body>
+</html>
